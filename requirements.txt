@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+pandas
+pymongo
+python-multipart
+aiohttp
+motor
+openpyxl
+dnspython
+python-dotenv
+sqlmodel
+psycopg2-binary
+datamodel-code-generator
+email-validator
