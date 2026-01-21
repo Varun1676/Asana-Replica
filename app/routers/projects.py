@@ -95,3 +95,19 @@ async def deleteproject(project_gid: str, session: Session = Depends(get_session
     session.delete(project)
     session.commit()
     return DataWrapper(data={})
+
+@router.post("/projects/{project_gid}/duplicate", response_model=DataWrapper[dict] | None, summary="Duplicate a project")
+async def duplicateproject(project_gid: str, session: Session = Depends(get_session)):
+    project = session.get(Project, project_gid)
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+        
+    new_project = Project(
+        name=project.name,
+        resource_type="project",
+        workspace_gid=project.workspace_gid
+    )
+    session.add(new_project)
+    session.commit()
+    session.refresh(new_project)
+    return DataWrapper(data={})

@@ -25,6 +25,8 @@ class User(BaseDBModel, table=True):
 # 3. Workspaces Table
 class Workspace(BaseDBModel, table=True):
     name: str
+    email_domains: List[str] = Field(default=[], sa_type=JSON)
+    is_organization: bool = Field(default=False)
     
     projects: List["Project"] = Relationship(back_populates="workspace")
     tasks: List["Task"] = Relationship(back_populates="workspace")
@@ -37,8 +39,18 @@ class Project(BaseDBModel, table=True):
     # Relationships
     workspace: Optional[Workspace] = Relationship(back_populates="projects")
     tasks: List["Task"] = Relationship(back_populates="project")
+    project_briefs: List["ProjectBrief"] = Relationship(back_populates="project")
 
-# 5. Tasks Table
+# 5. Project Briefs
+class ProjectBrief(BaseDBModel, table=True):
+    title: Optional[str] = None
+    html_text: Optional[str] = None
+    text: Optional[str] = None
+    project_gid: str = Field(foreign_key="project.gid")
+    
+    project: Optional[Project] = Relationship(back_populates="project_briefs")
+
+# 6. Tasks Table
 class Task(BaseDBModel, table=True):
     name: str
     completed: bool = False
@@ -53,3 +65,37 @@ class Task(BaseDBModel, table=True):
     assignee: Optional[User] = Relationship(back_populates="tasks")
     workspace: Optional[Workspace] = Relationship(back_populates="tasks")
     project: Optional[Project] = Relationship(back_populates="tasks")
+
+# 8. Teams
+class Team(BaseDBModel, table=True):
+    name: str
+    description: Optional[str] = None
+    workspace_gid: str = Field(foreign_key="workspace.gid")
+    visibility: str = "public"
+    
+    workspace: Optional[Workspace] = Relationship()
+
+# 9. Team Memberships
+class TeamMembership(BaseDBModel, table=True):
+    team_gid: str = Field(foreign_key="team.gid")
+    user_gid: str = Field(foreign_key="user.gid")
+    is_admin: bool = False
+    is_guest: bool = False
+    workspace_gid: Optional[str] = Field(default=None, foreign_key="workspace.gid")
+    project_gid: Optional[str] = Field(default=None, foreign_key="project.gid")
+
+# 6. Workspace Memberships
+class WorkspaceMembership(BaseDBModel, table=True):
+    user_gid: str = Field(foreign_key="user.gid")
+    workspace_gid: str = Field(foreign_key="workspace.gid")
+    is_active: bool = True
+    is_admin: bool = False
+    is_guest: bool = False
+
+# 7. Jobs
+class Job(BaseDBModel, table=True):
+    resource_subtype: Optional[str] = None
+    status: str = "in_progress"
+    new_project_gid: str = Field(foreign_key="project.gid")
+    new_task_gid: str = Field(foreign_key="task.gid")
+    created_by_gid: Optional[str] = Field(default=None, foreign_key="user.gid")

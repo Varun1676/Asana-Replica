@@ -4428,7 +4428,7 @@ class WorkspaceRequest(RootModel[WorkspaceBase]):
     root: WorkspaceBase
 
 
-class WorkspaceResponse(BaseModel):
+class WorkspaceResponse(WorkspaceCompact):
     email_domains: list[AnyUrl] | None = Field(
         None,
         description='The email domains that are associated with this workspace.',
